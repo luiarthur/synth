@@ -1,3 +1,5 @@
+import { sum } from "./util.js"
+
 function makeNotes() {
     // Definitions for first octave.
     const noteFreq = {
@@ -64,38 +66,66 @@ function playChord(ctx, waveform, chord, cutoff, startTime, duration, gainLevel)
 function main() {
     const ctx = new AudioContext()
 
-    const chords = [
-        [
-            notes[4]["C"], notes[4]["E"], notes[4]["A"],
-            notes[5]["D"], notes[5]["G"]
-        ],
-        [
-            notes[3]["B"], notes[4]["D#"], notes[4]["A"],
-            notes[5]["D"], notes[5]["G"]
-        ],
-        [
-            notes[3]["E"], notes[4]["G"], notes[4]["B"],
-            notes[5]["D"], notes[4]["F#"]
-        ],
-        [
-            notes[3]["D"], notes[4]["C"], notes[4]["E"],
-            notes[4]["F"], notes[4]["A"]
-        ],
+    const duration = 2 // seconds
+    const whole = duration
+    const half = whole / 2
+
+    const progression = [
+        {
+            chord: [
+                notes[4]["C"], notes[4]["E"], notes[4]["A"],
+                notes[5]["D"], notes[5]["G"]
+            ],
+            duration: whole
+        },
+        {
+            chord: [
+                notes[3]["B"], notes[4]["D#"], notes[4]["A"],
+                notes[5]["D"], notes[5]["G"]
+            ],
+            duration: whole
+        },
+        {
+            chord: [
+                notes[3]["E"], notes[4]["G"], notes[4]["B"],
+                notes[5]["D"], notes[5]["F#"]
+            ],
+            duration: whole
+        },
+        {
+            chord: [
+                notes[3]["D"], notes[4]["F"], notes[4]["A"],
+                notes[5]["C"], notes[5]["E"]
+            ],
+            duration: half
+        },
+        {
+            chord: [
+                notes[3]["G"], notes[4]["F"], notes[4]["G#"],
+                notes[4]["B"], notes[5]["E"]
+            ],
+            duration: half
+        }
     ]
+
     const startTime = 0.1
-    const duration = 2
     const cutoff = notes[4]["C"]
     const numRepeats = 4
 
     // Play this simple progression 4 times.
-    for (let j=0; j<chords.length*numRepeats; j++) {
-        let i = j % chords.length 
-        let chord = chords[i]
+    let chordStartTime = startTime
+    for (let j=0; j<progression.length*numRepeats; j++) {
+        let i = j % progression.length 
+        let chord = progression[i].chord
+        let duration = progression[i].duration
 
-        playChord(ctx, "sawtooth", chord, cutoff, startTime + j*duration, duration*0.98, 0.35) 
-        playChord(ctx, "triangle", chord, cutoff, startTime + j*duration, duration*0.98, 0.3) 
-        playChord(ctx, "square", chord, cutoff, startTime + j*duration, duration*0.98, 0.2) 
-        playChord(ctx, "sine", chord, cutoff, startTime + j*duration, duration*0.98, 0.1) 
+        // Mixing 4 oscillators!
+        playChord(ctx, "sawtooth", chord, cutoff, chordStartTime, duration*0.98, 0.35)
+        playChord(ctx, "triangle", chord, cutoff, chordStartTime, duration*0.98, 0.3)
+        playChord(ctx, "square", chord, cutoff, chordStartTime, duration*0.98, 0.2)
+        playChord(ctx, "sine", chord, cutoff, chordStartTime, duration*0.98, 0.1)
+    
+        chordStartTime = chordStartTime + duration
     }
 }
 
